@@ -1,37 +1,34 @@
 from datetime import date, datetime, timedelta
+from collections import defaultdict
 
 def get_birthdays_per_week(users):
-    today = date.today()
-    next_week = today + timedelta(days=7)
+    today_date = date.today()
+    current_year = today_date.year
+    users_list = defaultdict(list)
 
-    if not users or all(user['birthday'] < today for user in users):
+    if not users:
         return {}
-
-    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    birthday_dict = {day: [] for day in days_of_week}
 
     for user in users:
         name = user['name']
         birthday = user['birthday']
 
-        if today <= birthday < next_week:
-            day_of_week = birthday.strftime('%A')
+        birthday_this_year = birthday.replace(year=current_year)
 
-            if day_of_week not in ['Saturday', 'Sunday']:
-                birthday_dict[day_of_week].append(name)
+        if birthday.month == 1:
+            birthday_this_year = birthday.replace(year=current_year + 1)
 
-                current_year = today.year
-                current_date = today.replace(year=current_year)
-                if birthday.month == 1:
-                    birthday_this_year = birthday.replace(year=current_year + 1)
-                else:
-                    birthday_this_year = birthday.replace(year=current_year)
+        if birthday_this_year < today_date:
+            continue
 
-                if birthday_this_year < current_date:
-                        continue
+        day_name = birthday_this_year.strftime('%A')
 
+        if day_name in ['Saturday', 'Sunday']:
+            day_name = 'Monday'
 
-    return birthday_dict
+        users_list[day_name].append(name)
+
+    return users_list
 
 if __name__ == "__main__":
     users = [
